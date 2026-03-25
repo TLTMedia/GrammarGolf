@@ -49,7 +49,7 @@ function loadMenu() {
             }
         }))
     } else { // display steps in automatic mode
-        $("#menu").append($("<div/>", { id: "title", html: `${problemJSON.description} <hr style="border-top: dotted 1px;" />` }))
+        $("#menu").append($("<div/>", { id: "title", html: `${problemJSON.title} <hr style="border-top: dotted 1px;" />` }))
         $("#menu").append($("<div/>", { id: "points" }))
         $("#menu").append($("<div/>", { id: "problemSet" }))
     }
@@ -855,7 +855,6 @@ function setUpDrake() {
         lastDropPosition.x = event.clientX;
         lastDropPosition.y = event.clientY;
         const transitEl = document.querySelector('.gu-transit');
-    
     if (!transitEl) return;
 
     const container = transitEl.parentElement; // The .container grid
@@ -911,6 +910,7 @@ function setUpDrake() {
     // drake.on("shadow",resizeWindow)
     drake.on("drag", (el, source)=> {
         console.log(el, el.id, source) 
+        $(".animateWrong").removeClass("animateWrong")
         let row = $(source).attr("data-row")
         let column = parseInt($(el).attr("data-blockindex"))
         for (let i=0; i< traceNum; i++) {
@@ -929,6 +929,7 @@ function setUpDrake() {
         // if (target) {labelEmptyGridColumns(target)}
     })
     drake.on("drop", (el, target, source, sibling) => {//resizeWindow()
+        $(el).removeClass("animateWrong")
         console.log({el, target, source, sibling})
         console.log(traceNum, $(target).attr("data-row"))
         if (traceNum == "non") {
@@ -1010,6 +1011,9 @@ function setUpDrake() {
             // && (x.column === newBlockIndex || tracePad(trueRow, x.column, newBlockIndex))
             // && 
             if (targetColumn==newBlockIndex) {
+                if (nextEL!= "none") {
+                    target.insertBefore(el, nextEL);
+                }
                 $(el).attr("style", `grid-column: ${newBlockIndex+1}`)
                 console.log(el)
                 $(el).attr("data-traceindex", traceNum+1)

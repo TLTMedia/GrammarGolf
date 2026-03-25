@@ -41,7 +41,7 @@
             /* opacity: 0.8;
             transition: all 0.3s ease-in-out 33; */
             /* Ensure it spans the whole height/width of the grid cell */
-            width: 100% !important;
+            /* width: 100% !important; */
             height: 100% !important;
             margin: 0 !important;
             position: absolute !important;

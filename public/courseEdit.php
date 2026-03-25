@@ -3,13 +3,18 @@
 include("auth.php");
 $problem_set=glob("./problem_sets/". "*");
 $title = array();
+$selectItems= array();
 foreach ($problem_set as $key => $value) {
     $JSON = json_decode(file_get_contents($value));
-    $title[$key]=$JSON->title;
+    // print_r($value);
+    $jsonID=preg_match('/\.\/problem_sets[^_]*_([^\.]*)/',$value, $match);
+    $selectItems[(int)$match[1]]= $JSON->title;
+    //$title[$key]=$JSON->title;
+ 
     //  print_r($JSON->title);
     // echo "Key: " . $key . ", Value: " .     $title[$key]. "<br>";
 }
-
+print_r($selectItems);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -18,8 +23,8 @@ foreach ($problem_set as $key => $value) {
     <script> 
     document.addEventListener('DOMContentLoaded', ()=>loadCourse(), { once: true });
 
-    let courseCount = <?php echo json_encode(glob("./problem_sets/". "*"));?>;
-    let courseList = <?php echo json_encode($title);?>;
+    // let courseCount = <?php echo json_encode(glob("./problem_sets/". "*"));?>;
+    let courseList = <?php echo json_encode($selectItems);?>;
     console.log(courseList)
 
  function loadCourse(courseID=1){
@@ -37,19 +42,33 @@ foreach ($problem_set as $key => $value) {
         
      function init(problemJSON, courseID=1) 
  {document.body.innerHTML = ""
- let select = Object.assign(document.createElement("select"),{id:"select", innerHTML:"Select from here"})
- for (i=0; i < courseCount.length; i++){
-  console.log( courseCount[i]);
-     let courseID_select=courseCount[i]?.split(".json")[0].split("_").pop()
-    let courseString=`course_${courseID}`;
-     let option = Object.assign(document.createElement("option"),{innerHTML:`${courseID_select}`, id:`${courseID_select}`})
+ let select = Object.assign(document.createElement("select"),{id:"select"})
+ let defaultOption = document.createElement("option");
+ defaultOption.text = "Select from here";
+ defaultOption.value = ""; // Empty value for the placeholder
+ defaultOption.disabled = true; // Prevents the user from actively selecting the placeholder
+ defaultOption.selected = true;
+ select.appendChild(defaultOption);
+ for (const [courseID, courseTitle] of Object.entries(courseList)) {
+    console.log("ID:", courseID);
+    console.log("Title:", courseTitle);
+    // let courseID_select=courseCount[i]?.split(".json")[0].split("_").pop()
+    // let courseString=`course_${courseID}`;
+    let option = Object.assign(document.createElement("option"),{innerHTML:`${courseTitle}`, value:`${courseID}`})
      select.appendChild(option);
  }
  document.body.append(select);
  introText(`Select Course: `, select);
- document.getElementById('select').options.selectedIndex = courseID-1
+//  document.getElementById('select').options.selectedIndex = courseID-1
  document.getElementById("select").addEventListener('change', ()=>changeCourse());
-     document.body.append(Object.assign(document.createElement("button"),{id:"submit", innerHTML:"Submit All"})) 
+     document.body.append(Object.assign(document.createElement("button"),{id:"submit", innerHTML:"Submit"})) 
+     br()
+     const titleSpan = document.createElement('span');
+     let pageTitle = document.createTextNode(`${problemJSON.title}`);
+     titleSpan.append(pageTitle);
+     titleSpan.style.fontSize= '30px'
+     titleSpan.style.fontWeight = 'bold';
+     document.body.append(titleSpan);
      br()
      var i = 1;
      problemJSON.holes.forEach(hole=> {
@@ -65,25 +84,31 @@ foreach ($problem_set as $key => $value) {
      });
      let title = Object.assign(document.createElement("textArea"),{className:"title",innerHTML:problemJSON.title, style:"width:20rem"})
      document.body.append(title)
-     introText(`title for course ${courseID}: `, title);  
+     introText(`title: `, title);  
+     br()
+     let description = Object.assign(document.createElement("textArea"),{className:"description",innerHTML:problemJSON.description, style:"width:20rem"})
+     document.body.append(description)
+     introText(`description: `, description);  
      document.querySelectorAll("textArea").forEach(resizeInput)
      document.getElementById("submit").addEventListener('click', ()=>submitCourse(courseID), { once: true });
 
 
  }
  function changeCourse(){
-     let courseID = document.getElementById("select").value;
+    let selectElement = document.getElementById("select");
+     let courseID = selectElement.value;
      console.log(courseID);
      loadCourse(courseID);
-
+     selectElement.selectedIndex = 0;
  }
  function submitCourse(courseID){
      console.log(courseID)
      let expressions = document.querySelectorAll(".expression")
      let allNotes =  document.querySelectorAll(".notes")
      let title =  document.querySelector(".title")
+     let description=  document.querySelector(".description")
      console.log(expressions)
-     let problemJSON = {holes:[], title:title.value}
+     let problemJSON = {holes:[], description:description.value, title:title.value}
      expressions.forEach((expression, i)=>{
          console.log(expression.value)
          let notes = allNotes[i]
