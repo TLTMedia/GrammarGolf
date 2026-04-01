@@ -41,7 +41,7 @@
             /* opacity: 0.8;
             transition: all 0.3s ease-in-out 33; */
             /* Ensure it spans the whole height/width of the grid cell */
-            /* width: 100% !important; */
+            width: 100% !important;
             height: 100% !important;
             margin: 0 !important;
             position: absolute !important;
@@ -52,7 +52,7 @@
             border: 2px dashed #007bff;
             pointer-events: none !important;
             /* Put it underneath the actual grid items */
-            z-index: 0;
+            z-index: 0 !important;
         }
 
         .container>div:not(.gu-transit):not(.gu-mirror) {
@@ -540,8 +540,8 @@
             display: grid;
             grid-auto-rows: auto;
             grid-auto-columns: max-content;
-            /* grid-auto-flow: column;
-            grid-template-rows: max-content; */
+            grid-auto-flow: column;
+            /* grid-template-rows: max-content; */
             /* grid-template-columns: repeat(1, 1fr); */
             /* justify-content: center; */
             align-items: center;

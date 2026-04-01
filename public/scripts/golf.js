@@ -821,17 +821,17 @@ function setUpDrake() {
     let drake
     drake = dragula([...document.getElementsByClassName("container")], {
         isContainer: function (el) {
-            console.log(el)
-            console.log($(el).attr("data-row"))
-            console.log($(el).hasClass("container"))
-            if ($(el).attr("data-row") == "0") {
-                return false
-            }
-            if ($(el).hasClass("container")) {
-                return true
-            } else {
-                return false
-            }
+            let showDropHint = !($(el).attr("data-row") == "0") && $(el).hasClass("container") 
+            console.log(showDropHint)
+            return showDropHint;
+            // if ($(el).attr("data-row") == "0") {
+            //     return false
+            // }
+            // if ($(el).hasClass("container")) {
+            //     return true
+            // } else {
+            //     return false
+            // }
 
         },
         moves: function (el, container, handle) {
@@ -874,32 +874,38 @@ function setUpDrake() {
     // 2. Loop through items to see which one the mouse is currently hovering over
     for (let i = 0; i < items.length; i++) {
         const rect = items[i].getBoundingClientRect();
+        let nextExist = false;
+        let rectNext;
+        console.log(items[i])
+        if (i != items.length-1) {
+            nextExist = true
+            rectNext = items[i+1].getBoundingClientRect();
+        }
+        console.log(items[i])
+        const rectColumn = items[i].style.gridColumn
         
         // If the mouse X is within the left and right edges of this item
-        if (lastDropPosition.x >= rect.left && lastDropPosition.x <= rect.right) {
-            targetColumn = i + 1; // CSS Grid is 1-indexed
+        if ((nextExist && lastDropPosition.x >= rect.left&& lastDropPosition.x <= rectNext.left) || 
+            (!nextExist && lastDropPosition.x >= rect.left)) {
+            targetColumn = parseInt(rectColumn) + 1; // CSS Grid is 1-indexed
             found = true;
-            
-            // Optionally match the exact width of the hovered item
-            transitEl.style.width = `${rect.width}px`;
             break;
+        } else {
+            targetColumn = 1;
         }
     }
 
     // 3. If the mouse isn't over an item, check if it's on the far right side
     if (!found) {
         const lastItemRect = items[items.length - 1].getBoundingClientRect();
-        
+        const lastRectColumn = items[items.length - 1].style.gridColumn
         if (lastDropPosition.x > lastItemRect.right) {
             // Put it in the next empty column after the last item
-            targetColumn = items.length + 1; 
-            
-            // Maintain the width of the last item for visual consistency
-            transitEl.style.width = `${lastItemRect.width}px`;
+            targetColumn = parseInt(lastRectColumn) + 1; 
         } else if (lastDropPosition.x < items[0].getBoundingClientRect().left) {
             // Or if it's on the far left side
-            targetColumn = 1;
-            transitEl.style.width = `${items[0].getBoundingClientRect().width}px`;
+            targetColumn =1;
+            
         }
     }
 
@@ -937,12 +943,14 @@ function setUpDrake() {
             traceNum = traceInfo.length;
             return
         }
+        let rowOfTarget = target.attributes["data-row"].value
         let targetRow = parseInt(traceInfo[traceNum][0]["row"])
+        console.log(rowOfTarget, targetRow)
         let targetColumn = parseInt(traceInfo[traceNum][0]["info"].column)
         // $(".gu-mirror").remove()
         console.log(traceInfo, traceNum, targetRow, targetColumn)
         // if (target === null || targetRow != parseInt($(target).attr("data-row"))) { // dropped back where it originated
-        if (target === null) {
+        if (target === null || rowOfTarget != targetRow) {
             console.log("no movement")
             $(el).remove()
             return
@@ -1001,7 +1009,6 @@ function setUpDrake() {
         //console.log(findParent($(el)))
         document.removeEventListener('mousemove', updateLastPosition);
         // console.log(getTraceInfo(el, target))
-
         // test if this placement is valid for automatic mode
         if (mode == 'automatic') {
             newBlockIndex = parseInt($(el).attr("data-blockindex")) //update blockIndex
@@ -2178,7 +2185,6 @@ function drawArrows() {
 
     // Draw the triangle
     trianglePath.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-    trianglePath.setAttribute("fill", "#000"); // Ensure arrow head has a color
 
     marker.appendChild(trianglePath);
     defs.appendChild(marker);
