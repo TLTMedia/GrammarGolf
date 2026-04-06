@@ -57,7 +57,6 @@
 
         .container>div:not(.gu-transit):not(.gu-mirror) {
             position: relative;
-            z-index: 1;
         }
 
         .gu-mirror {
@@ -199,7 +198,7 @@
             width: 35rem;
             position: fixed;
             margin: 0rem !important;
-            z-index: 1000;
+            z-index: 100000;
             overflow: hidden;
         }
 
@@ -217,12 +216,12 @@
             /* The 'move' cursor for dragging */
             width: 90%;
             height: 0.1rem;
-            z-index: 1000;
+            z-index: 100000;
         }
 
         .headerNotice {
             color: var(--word);
-            z-index: 1000;
+            z-index: 100000;
         }
 
         .removeButton {
@@ -234,7 +233,7 @@
             cursor: pointer;
             top: 5%;
             right: 30rem;
-            z-index: 1000;
+            z-index: 100000;
         }
 
         #finishMeme,
@@ -395,7 +394,6 @@
             /* margin: auto; */
             padding: 0.1em .5em .1em .5em !important;
             /* width: 1.5em; */
-
             /* height: 0.7em; */
             left: 0 !important;
             top: 0 !important;
@@ -425,9 +423,9 @@
             grid-template-rows: repeat(auto-fit, 0.6em);
             grid-template-columns: repeat(3, 2.3em);
             background-color: var(--labelDiv);
-            z-index: 1000;
             left: -0.03em;
             top: 1.5em;
+            z-index: 10000 !important;
             /* border-radius: 10%; */
             border: .02em solid rgba(255, 255, 255, .8);
             /* flex-wrap: wrap; */
@@ -521,6 +519,7 @@
 
         .labelDiv {
             /* min-width: 5em; */
+            
         }
 
 
@@ -547,7 +546,6 @@
             align-items: center;
             margin: 1em 5em 0 5em;
             cursor: pointer;
-            z-index: 1;
             position: relative;
             background-color: transparent;
         }

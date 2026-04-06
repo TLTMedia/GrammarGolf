@@ -288,6 +288,12 @@ function getTraceInfo(){
 }
 
 function makeSelectable(sentence, row, blockIndex, selectionMode=undefined, wrongAnswers = [], different ="") {
+    console.log(document.getElementsByClassName(".gu-mirror"))
+    if (document.getElementsByClassName(".gu-mirror").length!=0) {
+        document.getElementsByClassName(".animateWrong").removeClass("animateWrong")
+        console.log("stop selectable feature, it is a drag")
+        return
+    }
     let bracketedSentence = $("#sentenceContainer").attr("data-bracketedSentence")
     let mode = parseQuery(window.location.search).mode || 'automatic'
     console.log(sentence, row, blockIndex, bracketedSentence, selectionMode, wrongAnswers, different)
@@ -446,7 +452,7 @@ function makeSelectable(sentence, row, blockIndex, selectionMode=undefined, wron
         //         $(this).attr("style", `grid-column: ${parseInt($(this).attr("data-blockindex"))+1}`)
         //     }
         // },
-        mousedown: function (e) {
+        click: function (e) {
             let clickedID = $(this).attr("id")
 
             let selectedJQ = $(`#${clickedID} .selected`)
@@ -868,7 +874,7 @@ function setUpDrake() {
 
     if (items.length === 0) return;
 
-    let targetColumn = 1;
+    let targetGridColumn = 1;
     let found = false;
 
     // 2. Loop through items to see which one the mouse is currently hovering over
@@ -887,11 +893,11 @@ function setUpDrake() {
         // If the mouse X is within the left and right edges of this item
         if ((nextExist && lastDropPosition.x >= rect.left&& lastDropPosition.x <= rectNext.left) || 
             (!nextExist && lastDropPosition.x >= rect.left)) {
-            targetColumn = parseInt(rectColumn) + 1; // CSS Grid is 1-indexed
+            targetGridColumn = parseInt(rectColumn) + 1; // CSS Grid is 1-indexed
             found = true;
             break;
         } else {
-            targetColumn = 1;
+            targetGridColumn = 1;
         }
     }
 
@@ -901,22 +907,23 @@ function setUpDrake() {
         const lastRectColumn = items[items.length - 1].style.gridColumn
         if (lastDropPosition.x > lastItemRect.right) {
             // Put it in the next empty column after the last item
-            targetColumn = parseInt(lastRectColumn) + 1; 
+            targetGridColumn = parseInt(lastRectColumn) + 1; 
         } else if (lastDropPosition.x < items[0].getBoundingClientRect().left) {
             // Or if it's on the far left side
-            targetColumn =1;
+            targetGridColumn =1;
             
         }
     }
 
     // 4. Force the transit background into the correct column
-    transitEl.style.gridColumn = targetColumn;
+    transitEl.style.gridColumn = targetGridColumn;
     };
     // drake.on("out",resizeWindow)
     // drake.on("shadow",resizeWindow)
     drake.on("drag", (el, source)=> {
         console.log(el, el.id, source) 
         $(".animateWrong").removeClass("animateWrong")
+        $(el).removeClass("animateWrong")
         let row = $(source).attr("data-row")
         let column = parseInt($(el).attr("data-blockindex"))
         for (let i=0; i< traceNum; i++) {
@@ -936,6 +943,7 @@ function setUpDrake() {
     })
     drake.on("drop", (el, target, source, sibling) => {//resizeWindow()
         $(el).removeClass("animateWrong")
+        $(".animateWrong").removeClass("animateWrong")
         console.log({el, target, source, sibling})
         console.log(traceNum, $(target).attr("data-row"))
         if (traceNum == "non") {
@@ -943,17 +951,22 @@ function setUpDrake() {
             traceNum = traceInfo.length;
             return
         }
-        let rowOfTarget = target.attributes["data-row"].value
         let targetRow = parseInt(traceInfo[traceNum][0]["row"])
-        console.log(rowOfTarget, targetRow)
         let targetColumn = parseInt(traceInfo[traceNum][0]["info"].column)
-        // $(".gu-mirror").remove()
-        console.log(traceInfo, traceNum, targetRow, targetColumn)
         // if (target === null || targetRow != parseInt($(target).attr("data-row"))) { // dropped back where it originated
-        if (target === null || rowOfTarget != targetRow) {
+        if (target === null) {
             console.log("no movement")
             $(el).remove()
             return
+        } else {
+            let rowOfTarget = target.attributes["data-row"].value
+            // $(".gu-mirror").remove()
+            console.log(traceInfo, traceNum, targetRow, targetColumn, rowOfTarget)
+            if (rowOfTarget != targetRow) {
+                console.log("target no right")
+                $(el).remove()
+                return
+            }
         }
         
         console.log($(target)[0].childNodes)
