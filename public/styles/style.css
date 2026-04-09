@@ -606,3 +606,16 @@
         #grading {
             display: none;
         }
+
+        /* Accessibility: Focus Outlines */
+        .wordContainer:focus-visible, 
+        .letterContainer:focus-visible, 
+        .labelDiv:focus-visible, 
+        .labelItem:focus-visible, 
+        .typeItem:focus-visible, 
+        .button:focus-visible, 
+        .hole:focus-visible {
+            outline: 3px solid #005fcc;
+            outline-offset: 2px;
+            border-radius: 4px;
+        }

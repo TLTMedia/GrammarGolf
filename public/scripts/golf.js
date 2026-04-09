@@ -34,8 +34,14 @@ function loadMenu() {
     let problemJSON = globals.problemJSON;
     mode = parseQuery(window.location.search).mode || 'automatic'
     if (mode == 'manual') {
-        $("#menu").append($("<div/>", { html: "Check Answer", class: "button" }).on({
-            "click": function (e) {
+    $("#menu").append($("<div/>", { html: "Check Answer", class: "button", tabindex: "0" }).on({
+        keydown: function(e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                $(this).trigger("click");
+            }
+        },
+        "click": function () {
                 if (getTree().replace(/  +/g, ' ') == bracketedSentence) {
                     //console.log("Correct!") 
                     alert("Correct!")
@@ -414,13 +420,25 @@ function makeSelectable(sentence, row, blockIndex, selectionMode=undefined, wron
                     $("#problemConstituent").removeAttr("data-noPadIndex");
                 } 
     let blockElement = [
-        (af ? $("<div/>", { class: "labelDiv", id: `label_row_${row}`, html: "?" }).on({
+        (af ? $("<div/>", { class: "labelDiv", id: `label_row_${row}`, html: "?", tabindex: "0" }).on({
+            keydown: function(e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    generateMenu.call(this, e);
+                }
+            },
             "click": generateMenu,
         }).css({ "cursor": "pointer" }): $("<div/>", { class: "labelDiv morphoHide"})),
         $("<div/>", { class: "constituentContainer", id:`row_id_${row}` }).append(sentenceArray)]
 
     if (different == "tenseItem") {
-        blockElement = [$("<div/>", { class: "labelDiv", id: `label_row_${row}`, html: "?" }).on({
+        blockElement = [$("<div/>", { class: "labelDiv", id: `label_row_${row}`, html: "?", tabindex: "0" }).on({
+            keydown: function(e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    generateMenu.call(this, e);
+                }
+            },
             "click": generateMenu}).css({ "cursor": "pointer" })]
             // tenseSelection(blockElement) 
             blockElement.push($("<div/>", { class: "tenseItem", html: `[+tns]` }))
@@ -741,9 +759,14 @@ function containerSetUpAndInput(text, index, traceIndexOffset, fudge, className,
         return sentenceArray
     }
     // console.log(text, index,traceIndexOffset, fudge, className, sentenceArray)
-    let container =  $("<div/>", { role:"checkbox","aria-checked":"false",html: text, "data-uid": Math.random(), "data-index": index+traceIndexOffset+fudge, class: className })
+    let container =  $("<div/>", { role:"checkbox","aria-checked":"false",html: text, "data-uid": Math.random(), "data-index": index+traceIndexOffset+fudge, class: className, tabindex: "0" })
                 .on({
-        
+                    keydown: function (e) {
+                        if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            selected(this);
+                        }
+                    },
                     mousemove: function (e) {
                         if (e.buttons == 1) {
                             selected(this)
@@ -876,12 +899,14 @@ function setUpDrake() {
 
     let targetGridColumn = 1;
     let found = false;
+    let targetGridEndColumn = 2;
 
     // 2. Loop through items to see which one the mouse is currently hovering over
     for (let i = 0; i < items.length; i++) {
         const rect = items[i].getBoundingClientRect();
         let nextExist = false;
         let rectNext;
+
         console.log(items[i])
         if (i != items.length-1) {
             nextExist = true
@@ -894,10 +919,12 @@ function setUpDrake() {
         if ((nextExist && lastDropPosition.x >= rect.left&& lastDropPosition.x <= rectNext.left) || 
             (!nextExist && lastDropPosition.x >= rect.left)) {
             targetGridColumn = parseInt(rectColumn) + 1; // CSS Grid is 1-indexed
+            targetGridEndColumn = targetGridColumn+1
             found = true;
             break;
         } else {
             targetGridColumn = 1;
+            targetGridEndColumn = parseInt(rectColumn)
         }
     }
 
@@ -908,15 +935,22 @@ function setUpDrake() {
         if (lastDropPosition.x > lastItemRect.right) {
             // Put it in the next empty column after the last item
             targetGridColumn = parseInt(lastRectColumn) + 1; 
+            targetGridEndColumn = targetGridColumn+1
         } else if (lastDropPosition.x < items[0].getBoundingClientRect().left) {
             // Or if it's on the far left side
             targetGridColumn =1;
-            
+            targetGridEndColumn = parseInt(items[0].style.gridColumn)
         }
     }
 
     // 4. Force the transit background into the correct column
-    transitEl.style.gridColumn = targetGridColumn;
+    transitEl.style.gridColumn = `${targetGridColumn}/${targetGridEndColumn}`;
+    console.log(transitEl, transitEl.style.gridColumn, parseInt(traceInfo[traceNum][0]["info"].column))
+        if (targetGridEndColumn-2 == parseInt(traceInfo[traceNum][0]["info"].column)) {
+            transitEl.style.display = 'block';
+        } else {
+            transitEl.style.display = 'none';
+        }
     };
     // drake.on("out",resizeWindow)
     // drake.on("shadow",resizeWindow)
@@ -1053,7 +1087,13 @@ function setUpDrake() {
             updatePoints()
             // finishAlarm()
         }
-        $(el).find(".labelDiv").text("?").css({ "cursor": "pointer" }).on({
+        $(el).find(".labelDiv").text("?").css({ "cursor": "pointer" }).attr("tabindex", "0").on({
+            keydown: function(e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    generateMenu.call(this, e);
+                }
+            },
             "click": generateMenu
         })
 
@@ -1264,12 +1304,12 @@ function generateMenu(e) {
         // "P's": "possPhrase"}
 
     let typeMenu = $("<div/>", { class: "typeMenu" }).append(
-            [$("<div/>", { class: "typeItem", html: "P", style: "float:right;" })])
+            [$("<div/>", { class: "typeItem", html: "P", style: "float:right;", tabindex: "0" })])
 
     let labelDivArray = []
     if ($("#sentenceContainer").attr("data-bracketedSentence").includes("' ")) {
         typeMenu = $("<div/>", { class: "typeMenu" }).append(
-            [$("<div/>", { class: "typeItem", html: "'" }), $("<div/>", { class: "typeItem", html: "P" })])
+            [$("<div/>", { class: "typeItem", html: "'", tabindex: "0" }), $("<div/>", { class: "typeItem", html: "P", tabindex: "0" })])
     }
 
     if ($(this).parent().attr("data-selectionMode") == "morphology") {
@@ -1278,7 +1318,7 @@ function generateMenu(e) {
     }
 
     for (i of labels[labelArrayID]) {
-        labelDivArray.push($("<div/>", { html: i, class: "labelItem" }))
+        labelDivArray.push($("<div/>", { html: i, class: "labelItem", tabindex: "0" }))
     }
 
     $(this).append($("<div/>", { class: "labelMenu" }).append([...labelDivArray, typeMenu]))
@@ -1298,6 +1338,12 @@ function generateMenu(e) {
     resizeWindow()
 
     $(this).find(".typeItem").on({
+        keydown: function(e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                $(this).trigger("click");
+            }
+        },
         "click": function (e) {
             let labelHTML = $(this).html()
             for (symbol of Object.keys(symbolMap)) {
@@ -1349,10 +1395,18 @@ function generateMenu(e) {
                 //     else $(this).removeClass("hide")
                 // })
             }
+            // Return focus to the first visible label item in the menu
+            $(this).closest(".labelMenu").find(".labelItem:not(.hide)").first().focus();
         }
     })
 
     $(".labelItem").on({
+        keydown: function(e) {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                $(this).trigger("click");
+            }
+        },
         "click": function (e) {
             let classes = new Set($(this).attr("class").split(" "))
             let types = new Set(Object.values(symbolMap))

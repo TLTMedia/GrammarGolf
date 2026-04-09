@@ -1,9 +1,9 @@
-<html>
+<html lang="en">
 
 <head>
     <link rel="icon" type="image/png" href="images/favicon.png" />
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
-        <title></title>
+        <title>Grammar Golf</title>
         <script src="scripts/parse.js"></script>
     <script src="scripts/bracketToString.js"></script>
     <script src="scripts/JSON_API.js"></script>
@@ -23,7 +23,7 @@
 
 <body>
 
-    <div id="stage">
+    <main id="stage">
         <div id="sentenceContainer">
             <svg id="lineContainer">
 
@@ -32,11 +32,11 @@
 
             </div>
         </div>
-        <div id="menu">
+        <nav id="menu">
 
-        </div>
+        </nav>
 
-    </div>
+    </main>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/dragula/3.6.6/dragula.js'></script>
     <script>dragula([document.getElementById("right")], {
             copy: true, copySortSource: true
